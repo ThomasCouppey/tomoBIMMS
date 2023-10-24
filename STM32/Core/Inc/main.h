@@ -53,6 +53,8 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
+#define Mask_data 0x00FFFFFFF
+#define shift_com 29
 
 /* USER CODE END EFP */
 
@@ -68,6 +70,16 @@ void Error_Handler(void);
 #define MISO_AD2_GPIO_Port GPIOA
 #define MOSI_AD2_Pin GPIO_PIN_7
 #define MOSI_AD2_GPIO_Port GPIOA
+#define CS_SERIAL_Pin GPIO_PIN_12
+#define CS_SERIAL_GPIO_Port GPIOB
+#define SCLK_SERIAL_Pin GPIO_PIN_13
+#define SCLK_SERIAL_GPIO_Port GPIOB
+#define MOSI_SERIAL_Pin GPIO_PIN_15
+#define MOSI_SERIAL_GPIO_Port GPIOB
+#define EN_B2_Pin GPIO_PIN_8
+#define EN_B2_GPIO_Port GPIOB
+#define EN_B1_Pin GPIO_PIN_9
+#define EN_B1_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

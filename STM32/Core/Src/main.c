@@ -40,6 +40,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 SPI_HandleTypeDef hspi1;
+SPI_HandleTypeDef hspi2;
 
 /* USER CODE BEGIN PV */
 long int data_from_AD2;
@@ -47,6 +48,7 @@ long int data_to_AD2;
 uint8_t rxBuff[4];
 uint8_t txBuff[4];
 short unsigned int state,new_32bitsSPI;
+void Data2buff(long int data);
 
 /* USER CODE END PV */
 
@@ -54,6 +56,7 @@ short unsigned int state,new_32bitsSPI;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_SPI1_Init(void);
+static void MX_SPI2_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -101,8 +104,62 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_SPI1_Init();
+  MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
   HAL_GPIO_WritePin(LED_r_GPIO_Port, LED_r_Pin, GPIO_PIN_SET); // Pin active low
+
+
+  HAL_GPIO_WritePin(GPIOB, EN_B1_Pin, GPIO_PIN_SET);		//BIMMS #1 Switches enable
+  HAL_GPIO_WritePin(GPIOB, EN_B2_Pin, GPIO_PIN_RESET);		//BIMMS #2 Switches disable
+
+  HAL_GPIO_WritePin(GPIOB, EN_B2_Pin, GPIO_PIN_RESET);		//BIMMS #2 Switches disable
+
+  HAL_GPIO_WritePin(GPIOB, CS_SERIAL_Pin, GPIO_PIN_SET);	//Serial CS pin High
+
+
+
+  uint8_t block1_6[3]={// Array of 3 bytes for transmit 24 bits
+  		0x00, // First byte 	0000 0001 || Stm-_E1 |	Stm+_E2
+		0x00, // Second byte 	0010 0011 || CH2-_E3 |	CH2+_E4
+		0xF0, // Third byte 	0100 0101 || CH1-_E5 |	CH1+_E6
+  };
+
+
+  void decode_data(long int data)
+  {
+      short int command = (data >> shift_com) & 0xFF ;
+	  if (command == 10)
+		  HAL_GPIO_TogglePin(LED_r_GPIO_Port, LED_r_Pin); // Pin active low)
+      /*
+      switch (command)
+      {
+          case set_state:
+              update_state(data & Mask_data);
+              break;
+
+          case read_reg:
+              send_register(data & Mask_data);
+              break;
+
+          case set_relays:
+              if (state == idle_state)
+              {
+                  updateRelay (data & Mask_data);
+              }
+      }
+      */
+  }
+
+  // test:
+  for (int i = 0; i < 256; ++i)
+  {
+	 block1_6[2] = 127;
+	 HAL_GPIO_WritePin(GPIOB, CS_SERIAL_Pin, 0); //selector of slave, active on LOW state
+	 HAL_SPI_Transmit(&hspi2, (uint8_t*)(block1_6),3, HAL_MAX_DELAY); //(SPI used , buffer, size of data, time of transmission)
+	 HAL_GPIO_WritePin(GPIOB, CS_SERIAL_Pin, 1);
+	 HAL_Delay(100);
+
+  };
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -111,7 +168,9 @@ int main(void)
   {
       if (new_32bitsSPI)
       {
-    	  HAL_GPIO_TogglePin(LED_r_GPIO_Port, LED_r_Pin); // Pin active low)
+    	  decode_data(data_from_AD2);
+
+    	  //Data2buff(data_from_AD2); //test
           new_32bitsSPI = 0;
       }
 
@@ -206,6 +265,44 @@ static void MX_SPI1_Init(void)
 }
 
 /**
+  * @brief SPI2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_SPI2_Init(void)
+{
+
+  /* USER CODE BEGIN SPI2_Init 0 */
+
+  /* USER CODE END SPI2_Init 0 */
+
+  /* USER CODE BEGIN SPI2_Init 1 */
+
+  /* USER CODE END SPI2_Init 1 */
+  /* SPI2 parameter configuration*/
+  hspi2.Instance = SPI2;
+  hspi2.Init.Mode = SPI_MODE_MASTER;
+  hspi2.Init.Direction = SPI_DIRECTION_2LINES;
+  hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
+  hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
+  hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
+  hspi2.Init.NSS = SPI_NSS_SOFT;
+  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+  hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
+  hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
+  hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+  hspi2.Init.CRCPolynomial = 10;
+  if (HAL_SPI_Init(&hspi2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN SPI2_Init 2 */
+
+  /* USER CODE END SPI2_Init 2 */
+
+}
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -218,9 +315,13 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(LED_r_GPIO_Port, LED_r_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, CS_SERIAL_Pin|EN_B2_Pin|EN_B1_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : LED_r_Pin */
   GPIO_InitStruct.Pin = LED_r_Pin;
@@ -234,6 +335,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(CS_AD2_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : CS_SERIAL_Pin EN_B2_Pin EN_B1_Pin */
+  GPIO_InitStruct.Pin = CS_SERIAL_Pin|EN_B2_Pin|EN_B1_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI4_IRQn, 0, 0);
@@ -249,14 +357,19 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
     	HAL_SPI_TransmitReceive(&hspi1, txBuff,rxBuff, 4, 10);
         data_from_AD2 = (rxBuff[0] << 24) | (rxBuff[1] << 16) | (rxBuff[2] << 8) | (rxBuff[3]);
 
+
         HAL_SPI_DeInit(&hspi1); // reset the state machine back to original state
         HAL_SPI_Init(&hspi1) ;	//avoid false detection (dirty hack but ...)
 
 
         if (data_from_AD2)
-            new_32bitsSPI = 1;
+        {
+        	new_32bitsSPI = 1;
+        }
+
     }
 }
+
 
 /* USER CODE END 4 */
 
