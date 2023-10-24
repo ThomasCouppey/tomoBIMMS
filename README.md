@@ -6,6 +6,7 @@
 Third party software (Waveform) has to be installed before BIMMS python API. 
 BIMMS has been developped for python 3.
 Required packages:
+- BIMMS
 - numpy
 - scipy
 - matplotlib
