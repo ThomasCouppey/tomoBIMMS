@@ -42,6 +42,11 @@
 SPI_HandleTypeDef hspi1;
 
 /* USER CODE BEGIN PV */
+long int data_from_AD2;
+long int data_to_AD2;
+uint8_t rxBuff[4];
+uint8_t txBuff[4];
+short unsigned int state,new_32bitsSPI;
 
 /* USER CODE END PV */
 
@@ -81,6 +86,15 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
+  //Init Global Variables
+  for (short unsigned int i = 0; i<4; i++)
+      {
+         rxBuff[i]=0;
+         txBuff[i]=0;
+      }
+
+  data_from_AD2 = 0;
+  new_32bitsSPI = 0;
 
   /* USER CODE END SysInit */
 
@@ -88,13 +102,19 @@ int main(void)
   MX_GPIO_Init();
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
-
+  HAL_GPIO_WritePin(LED_r_GPIO_Port, LED_r_Pin, GPIO_PIN_SET); // Pin active low
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+      if (new_32bitsSPI)
+      {
+    	  HAL_GPIO_TogglePin(LED_r_GPIO_Port, LED_r_Pin); // Pin active low)
+          new_32bitsSPI = 0;
+      }
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -211,13 +231,32 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : CS_AD2_Pin */
   GPIO_InitStruct.Pin = CS_AD2_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(CS_AD2_GPIO_Port, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI4_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI4_IRQn);
 
 }
 
 /* USER CODE BEGIN 4 */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+    if(GPIO_Pin == CS_AD2_Pin)
+    {
+    	HAL_SPI_TransmitReceive(&hspi1, txBuff,rxBuff, 4, 10);
+        data_from_AD2 = (rxBuff[0] << 24) | (rxBuff[1] << 16) | (rxBuff[2] << 8) | (rxBuff[3]);
+
+        HAL_SPI_DeInit(&hspi1); // reset the state machine back to original state
+        HAL_SPI_Init(&hspi1) ;	//avoid false detection (dirty hack but ...)
+
+
+        if (data_from_AD2)
+            new_32bitsSPI = 1;
+    }
+}
 
 /* USER CODE END 4 */
 
