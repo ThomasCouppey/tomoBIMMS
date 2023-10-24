@@ -43,11 +43,12 @@ SPI_HandleTypeDef hspi1;
 SPI_HandleTypeDef hspi2;
 
 /* USER CODE BEGIN PV */
-long int data_from_AD2;
+volatile long int data_from_AD2;
 long int data_to_AD2;
 uint8_t rxBuff[4];
 uint8_t txBuff[4];
-short unsigned int state,new_32bitsSPI;
+short unsigned int state;
+volatile short unsigned int new_32bitsSPI;
 void Data2buff(long int data);
 
 /* USER CODE END PV */
@@ -58,6 +59,38 @@ static void MX_GPIO_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_SPI2_Init(void);
 /* USER CODE BEGIN PFP */
+
+
+void decode_data(long int data)
+{
+    short int command = (data >> shift_com) & 0xFF ;
+    //HAL_GPIO_TogglePin(LED_r_GPIO_Port, LED_r_Pin); // Pin active low)
+
+
+	 if (command == 10) //IT WORKS!
+		 HAL_GPIO_WritePin(LED_r_GPIO_Port, LED_r_Pin, GPIO_PIN_RESET); // Pin active low
+
+
+    /*
+    switch (command)
+    {
+        case set_state:
+            update_state(data & Mask_data);
+            break;
+
+        case read_reg:
+            send_register(data & Mask_data);
+            break;
+
+        case set_relays:
+            if (state == idle_state)
+            {
+                updateRelay (data & Mask_data);
+            }
+    }
+    */
+
+}
 
 /* USER CODE END PFP */
 
@@ -125,32 +158,10 @@ int main(void)
   };
 
 
-  void decode_data(long int data)
-  {
-      short int command = (data >> shift_com) & 0xFF ;
-	  if (command == 10)
-		  HAL_GPIO_TogglePin(LED_r_GPIO_Port, LED_r_Pin); // Pin active low)
-      /*
-      switch (command)
-      {
-          case set_state:
-              update_state(data & Mask_data);
-              break;
 
-          case read_reg:
-              send_register(data & Mask_data);
-              break;
-
-          case set_relays:
-              if (state == idle_state)
-              {
-                  updateRelay (data & Mask_data);
-              }
-      }
-      */
-  }
 
   // test:
+  /*
   for (int i = 0; i < 256; ++i)
   {
 	 block1_6[2] = 127;
@@ -160,19 +171,15 @@ int main(void)
 	 HAL_Delay(100);
 
   };
+  */
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-      if (new_32bitsSPI)
-      {
-    	  decode_data(data_from_AD2);
 
-    	  //Data2buff(data_from_AD2); //test
-          new_32bitsSPI = 0;
-      }
+
 
     /* USER CODE END WHILE */
 
@@ -362,9 +369,11 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         HAL_SPI_Init(&hspi1) ;	//avoid false detection (dirty hack but ...)
 
 
+
         if (data_from_AD2)
         {
-        	new_32bitsSPI = 1;
+        	decode_data(data_from_AD2);
+        	//new_32bitsSPI = 1;
         }
 
     }
