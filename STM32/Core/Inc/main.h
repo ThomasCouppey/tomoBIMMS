@@ -53,8 +53,9 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-#define Mask_data 0x00FFFFF
-#define shift_com 25
+#define Mask_data 0x00FFFFFF
+#define shift_com 24
+#define set_sw_cmd 0x0A
 
 /* USER CODE END EFP */
 

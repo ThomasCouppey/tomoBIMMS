@@ -49,7 +49,6 @@ uint8_t rxBuff[4];
 uint8_t txBuff[4];
 short unsigned int state;
 volatile short unsigned int new_32bitsSPI;
-void Data2buff(long int data);
 
 /* USER CODE END PV */
 
@@ -64,31 +63,16 @@ static void MX_SPI2_Init(void);
 void decode_data(long int data)
 {
     short int command = (data >> shift_com) & 0xFF ;
-    //HAL_GPIO_TogglePin(LED_r_GPIO_Port, LED_r_Pin); // Pin active low)
+    data = data& Mask_data;
+
+	 if (command == set_sw_cmd)
+	 {
+		 HAL_GPIO_WritePin(GPIOB, CS_SERIAL_Pin, 0); //selector of slave, active on LOW state
+		 HAL_SPI_Transmit(&hspi2, (uint8_t*)(&data),3, HAL_MAX_DELAY); //(SPI used , buffer, size of data, time of transmission)
+		 HAL_GPIO_WritePin(GPIOB, CS_SERIAL_Pin, 1);
+	 }
 
 
-	 if (command == 10) //IT WORKS!
-		 HAL_GPIO_WritePin(LED_r_GPIO_Port, LED_r_Pin, GPIO_PIN_RESET); // Pin active low
-
-
-    /*
-    switch (command)
-    {
-        case set_state:
-            update_state(data & Mask_data);
-            break;
-
-        case read_reg:
-            send_register(data & Mask_data);
-            break;
-
-        case set_relays:
-            if (state == idle_state)
-            {
-                updateRelay (data & Mask_data);
-            }
-    }
-    */
 
 }
 
@@ -145,33 +129,10 @@ int main(void)
   HAL_GPIO_WritePin(GPIOB, EN_B1_Pin, GPIO_PIN_SET);		//BIMMS #1 Switches enable
   HAL_GPIO_WritePin(GPIOB, EN_B2_Pin, GPIO_PIN_RESET);		//BIMMS #2 Switches disable
 
-  HAL_GPIO_WritePin(GPIOB, EN_B2_Pin, GPIO_PIN_RESET);		//BIMMS #2 Switches disable
-
   HAL_GPIO_WritePin(GPIOB, CS_SERIAL_Pin, GPIO_PIN_SET);	//Serial CS pin High
 
 
 
-  uint8_t block1_6[3]={// Array of 3 bytes for transmit 24 bits
-  		0x00, // First byte 	0000 0001 || Stm-_E1 |	Stm+_E2
-		0x00, // Second byte 	0010 0011 || CH2-_E3 |	CH2+_E4
-		0xF0, // Third byte 	0100 0101 || CH1-_E5 |	CH1+_E6
-  };
-
-
-
-
-  // test:
-  /*
-  for (int i = 0; i < 256; ++i)
-  {
-	 block1_6[2] = 127;
-	 HAL_GPIO_WritePin(GPIOB, CS_SERIAL_Pin, 0); //selector of slave, active on LOW state
-	 HAL_SPI_Transmit(&hspi2, (uint8_t*)(block1_6),3, HAL_MAX_DELAY); //(SPI used , buffer, size of data, time of transmission)
-	 HAL_GPIO_WritePin(GPIOB, CS_SERIAL_Pin, 1);
-	 HAL_Delay(100);
-
-  };
-  */
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -179,7 +140,12 @@ int main(void)
   while (1)
   {
 
+	  if (new_32bitsSPI)
+	  {
+		  new_32bitsSPI =0;
+		  decode_data(data_from_AD2);
 
+	  }
 
     /* USER CODE END WHILE */
 
@@ -372,8 +338,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 
         if (data_from_AD2)
         {
-        	decode_data(data_from_AD2);
-        	//new_32bitsSPI = 1;
+        	//decode_data(data_from_AD2);
+        	new_32bitsSPI = 1;
         }
 
     }
