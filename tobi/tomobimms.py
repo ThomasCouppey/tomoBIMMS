@@ -29,7 +29,6 @@ class TomoBimms(BIMMS):
 
     def set_switches(self, switches_vector, bimms_sel=0):
         value = cstmux.cmd_shift * (cstmux.set_switch + bimms_sel) + switches_vector
-        print(bin(value))
         self.tx_2_STM32_MUX(value)
 
     def electrode_2_vector(self,electrode,shift,mask):
