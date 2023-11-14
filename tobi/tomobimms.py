@@ -16,7 +16,6 @@ class TomoBimms(BIMMS):
         self.sw_vector=cstmux.sw_default 
         self.set_switches(0)    #Dummy set (Bug?)
 
-
     ##
     def SPI_init_MUX(self):
         self.SPI_init(cstmux.MUX_STM32_CLK, cstmux.MUX_STM32_CLK_p, cstmux.MUX_STM32_MOSI_p, cstmux.MUX_STM32_MISO_p, cstmux.MUX_STM32_CS_p)
