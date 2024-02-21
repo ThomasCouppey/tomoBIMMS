@@ -26,7 +26,7 @@ TB1.config.excitation_coupling("DC")
 TB1.config.G_EIS_gain("HIGH")
 TB1.config.IRO_gain(Gain_IRO)
 TB1.config.VRO_gain(Gain_VRO)
-TB1.config.I_amplitude = I_stim 
+TB1.config.I_amplitude = I_stim
 
 
 TB1.set_STIMn_to_elec(ELEC_GND)
@@ -42,7 +42,7 @@ for k in range (ELEC_min,ELEC_max+1):
     m1 = bm.EIS(fmin=fmin,fmax=fmax,n_pts=n_pts,settling_time=settling_time,NPeriods=NPeriods)
     TB1.attach_measure(m1)
     results = TB1.measure()
-    plt.semilogx(results['freq'],results['mag_Z']) 
+    plt.semilogx(results['freq'],results['mag_Z'])
 
 
 del TB1

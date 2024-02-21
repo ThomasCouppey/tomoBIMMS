@@ -10,5 +10,7 @@ __copyright__       = 'Louis Regnacq'
 __license__         = 'CeCILL'
 
 # Public interface
-from .tomobimms import *
-from .constantsmux import *
+from .results.EIT_results import *
+from .protocole.Protocole import *
+from .system.tomobimms import *
+from .utils.constantsmux import *

@@ -12,7 +12,7 @@ fmax = 1e6
 n_pts = 101
 settling_time = 0.01
 NPeriods = 8
-I_stim = 10 #100uA excitation
+I_stim = 5 #100uA excitation
 
 ELEC_GND = 8
 ELEC_min = 1
@@ -36,28 +36,31 @@ TB1.set_CH1n_to_elec(1)
 
 N_electrode = 8
 plt.figure()
-for k in range (N_electrode):
-    stim_n = k+1
-    stm_p = ((k+1)%N_electrode)+1
-    print("=========================")
-    print("Stim_n: " +str(stim_n))
-    print("Stim_p: " +str(stm_p))
-    for j in range (N_electrode-3):
-        V_neg = ((stm_p+j)%N_electrode)+1
-        V_pos = ((V_neg)%N_electrode)+1
-        print("V_neg: " +str(V_neg))
-        print("V_pos: " +str(V_pos))
+colors = ["b","orange","g","r","y"]
+for i in range(5):
+    color = colors[i]
+    for k in range (N_electrode):
+        stim_n = k+1
+        stm_p = ((k+1)%N_electrode)+1
+        print("=========================")
+        print("Stim_n: " +str(stim_n))
+        print("Stim_p: " +str(stm_p))
+        for j in range (N_electrode-3):
+            V_neg = ((stm_p+j)%N_electrode)+1
+            V_pos = ((V_neg)%N_electrode)+1
+            print("V_neg: " +str(V_neg))
+            print("V_pos: " +str(V_pos))
 
-        TB1.set_STIMn_to_elec(stim_n)
-        TB1.set_STIMp_to_elec(stm_p)
+            TB1.set_STIMn_to_elec(stim_n)
+            TB1.set_STIMp_to_elec(stm_p)
 
-        TB1.set_CH1p_to_elec(V_neg)
-        TB1.set_CH2p_to_elec(V_pos)
+            TB1.set_CH1p_to_elec(V_neg)
+            TB1.set_CH2p_to_elec(V_pos)
 
-        m1 = bm.Bode(fmin=fmin,fmax=fmax,n_pts=n_pts,settling_time=settling_time,NPeriods=NPeriods)
-        TB1.attach_measure(m1)
-        results = TB1.measure()
-        plt.semilogx(results['freq'],results['V_readout']) 
+            m1 = bm.Bode(fmin=fmin,fmax=fmax,n_pts=n_pts,settling_time=settling_time,NPeriods=NPeriods)
+            TB1.attach_measure(m1)
+            results = TB1.measure()
+            plt.semilogx(results['freq'],results['V_readout'], color=color) 
 
 del TB1
 plt.show()
