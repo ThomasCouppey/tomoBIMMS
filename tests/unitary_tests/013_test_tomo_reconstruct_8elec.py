@@ -54,16 +54,16 @@ amp_AWG = 0.5
 tb1.test_config.AWG_amp(amp_AWG)
 
 """
-p1 = tobi.simple_injection_protocole(n_elec=n_elec)
+p1 = tobi.simple_injection_protocol(n_elec=n_elec)
 
 """
-p1 = tobi.protocole()
+p1 = tobi.protocol()
 for i in range(10):
     p1.add_patern(inj=(1, 2), rec=(5, 6))
     p1.add_patern(inj=(3, 4), rec=(7, 8))
     #p1.add_patern(inj=(3, 4), rec=(3, 4))
 
-tb1.protocole = p1
+tb1.protocol = p1
 
 m1 = bm.FrequentialSingleFrequency(freq=1000,nperiods=32 ,settling_time=0.001)
 #m1 = bm.TemporalSingleFrequency(freq = 1000,nperiods=10)

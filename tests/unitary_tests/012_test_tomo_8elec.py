@@ -23,10 +23,10 @@ tb1.config.DC_feedback = False
 tb1.config.V_amplitude = 100 # mV
 
 
-p1 = tobi.simple_injection_protocole()
+p1 = tobi.simple_injection_protocol()
 
 
-tb1.protocole = p1
+tb1.protocol = p1
 
 
 

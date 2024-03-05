@@ -39,7 +39,7 @@ tb1.test_config.TIA_coupling("DC")
 tb1.test_config.connect_TIA(False)
 tb1.test_config.TIA_to_CH2(False)
 tb1.test_config.TIA_NEG("GND")
-tb1.test_config.CH1_gain(2)
+tb1.test_config.CH1_gain(50)
 tb1.test_config.CH2_gain(1)
 
 amp_AWG = 1
@@ -49,7 +49,7 @@ tb1.test_config.AWG_amp(amp_AWG)
 #tb1.test_config.AWG_offset(AWG_offset)
 
 
-"""p1 = tobi.protocole()
+"""p1 = tobi.protocol()
 p1.add_patern(inj=(1, 6), rec=(2, 5))
 p1.add_patern(inj=(1, 6), rec=(2, 3))"""
 #p1.add_patern(inj=(2, 4), rec=(3, 5))
@@ -64,13 +64,13 @@ p1.add_patern(inj=(1, 7), rec=(2, 6))"""
 
 n_elec = 8
 
-p1 = tobi.simple_injection_protocole(n_elec=n_elec, inj_offset=2)
+p1 = tobi.simple_injection_protocol(n_elec=n_elec, inj_offset=1)
 p1.change_electrode_id(0, 8)
-tb1.protocole = p1
+tb1.protocol = p1
 
 #m1 = bm.FrequentialSingleFrequency(freq=1000,nperiods=8 ,settling_time=0.001)
-f = 1000
-n_p = 10 + 4
+f = 10000
+n_p = 30 
 m1 = bm.TemporalSingleFrequency(freq=f,nperiods=n_p,)
 v1 = np.zeros(len(p1))
 v1 = np.zeros(len(p1))
@@ -85,7 +85,7 @@ tb1.attach_measure(m1)
 results = tb1.eit_measure(rec_kwargs={"clear_mstack":False})
 #results = tb1.measure()
 
-t_lim = (4/f, (n_p-3)/f)
+t_lim = (5/f, (n_p-5)/f)
 results.fft(*t_lim)
 
 v1 = results.amp_freq(f)
@@ -120,9 +120,9 @@ plt.figure()
 plt.plot(v1)
 plt.plot(v2)
 
-mesh_obj = mesh.create(n_elec, h0=0.05)
-protocol_obj = protocol.create(n_elec, dist_exc=2, step_meas=1, parser_meas="std")
-"""eit = bp.BP(mesh_obj, protocol_obj)
+mesh_obj = mesh.create(n_elec, h0=0.09)
+protocol_obj = protocol.create(n_elec, dist_exc=1, step_meas=1, parser_meas="std")
+eit = bp.BP(mesh_obj, protocol_obj)
 eit.setup(weight="none")
 # the normalize for BP when dist_exc>4 should always be True
 ds = eit.solve(v2, v1, normalize=True)
@@ -130,7 +130,7 @@ ds = eit.solve(v2, v1, normalize=True)
 eit = jac.JAC(mesh_obj, protocol_obj)
 eit.setup(p=0.50, lamb=1e-3, method="kotre")
 ds = eit.solve(v2, v1, normalize=True)
-
+"""
 # extract node, element, alpha
 pts = mesh_obj.node
 tri = mesh_obj.element

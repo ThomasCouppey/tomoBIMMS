@@ -11,6 +11,6 @@ __license__         = 'CeCILL'
 
 # Public interface
 from .results.EIT_results import *
-from .protocole.Protocole import *
+from .protocol.Protocol import *
 from .system.tomobimms import *
 from .utils.constantsmux import *

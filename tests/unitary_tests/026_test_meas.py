@@ -27,7 +27,7 @@ tb1.test_config.waveform_gen("INTERNAL")
 tb1.test_config.excitation_source("CURRENT")
 tb1.test_config.I_source_gain("HIGH")
 tb1.test_config.wire_mode("4_WIRE")
-tb1.test_config.excitation_signaling_mode("SE")
+tb1.test_config.excitation_signaling_mode("DIFF")
 tb1.test_config.excitation_coupling("DC")
 tb1.test_config.DC_feedback(False)
 tb1.test_config.Enable_Isource(True)
@@ -39,7 +39,7 @@ tb1.test_config.TIA_coupling("DC")
 tb1.test_config.connect_TIA(False)
 tb1.test_config.TIA_to_CH2(False)
 tb1.test_config.TIA_NEG("GND")
-tb1.test_config.CH1_gain(50)
+tb1.test_config.CH1_gain(20)
 tb1.test_config.CH2_gain(1)
 
 amp_AWG = 1
@@ -51,7 +51,7 @@ tb1.test_config.AWG_amp(amp_AWG)
 n_elec = 16
 p0 = tobi.simple_injection_protocol(n_elec=16, inj_offset=1)
 p1 = tobi.protocol()
-N_test = 10
+N_test = 50
 for _ in range(N_test):
     for i in range(n_elec-3):
         print(p0[i])

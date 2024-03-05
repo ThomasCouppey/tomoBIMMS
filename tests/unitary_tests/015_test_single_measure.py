@@ -45,7 +45,7 @@ tb1.test_config.AWG_amp(amp_AWG)
 #tb1.test_config.AWG_offset(AWG_offset)
 
 
-p1 = tobi.protocole()
+p1 = tobi.protocol()
 p1.add_patern(inj=(1, 8), rec=(2, 3))
 
 #p1.add_patern(inj=(7, 6), rec=(2, 3))
@@ -60,7 +60,7 @@ p1.add_patern(inj=(10,4), rec=(9,5))
 p1.add_patern(inj=(1, 7), rec=(2, 6))"""
 
 
-tb1.protocole = p1
+tb1.protocol = p1
 #m1 = bm.FrequentialSingleFrequency(freq=1000,nperiods=8 ,settling_time=0.001)
 f = 1000
 m1 = bm.TemporalSingleFrequency(freq=f,nperiods=10+4,)

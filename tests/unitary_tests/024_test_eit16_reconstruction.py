@@ -7,6 +7,9 @@ import pyeit.eit.bp as bp
 import pyeit.eit.jac as jac
 import pyeit.eit.protocol as protocol
 import pyeit.mesh as mesh
+import time
+
+fname = "unitary_tests/results/024_results"
 
 def bandpass(data: np.ndarray, edges: list[float], sample_rate: float, poles: int = 5):
     sos = scipy.signal.butter(poles, edges, 'bandpass', fs=sample_rate, output='sos')
@@ -27,7 +30,7 @@ tb1.test_config.waveform_gen("INTERNAL")
 tb1.test_config.excitation_source("CURRENT")
 tb1.test_config.I_source_gain("HIGH")
 tb1.test_config.wire_mode("4_WIRE")
-tb1.test_config.excitation_signaling_mode("SE")
+tb1.test_config.excitation_signaling_mode("DIFF")
 tb1.test_config.excitation_coupling("DC")
 tb1.test_config.DC_feedback(False)
 tb1.test_config.Enable_Isource(True)
@@ -39,7 +42,7 @@ tb1.test_config.TIA_coupling("DC")
 tb1.test_config.connect_TIA(False)
 tb1.test_config.TIA_to_CH2(False)
 tb1.test_config.TIA_NEG("GND")
-tb1.test_config.CH1_gain(50)
+tb1.test_config.CH1_gain(20)
 tb1.test_config.CH2_gain(1)
 
 amp_AWG = 1
@@ -48,39 +51,31 @@ amp_AWG = 1
 tb1.test_config.AWG_amp(amp_AWG)
 #tb1.test_config.AWG_offset(AWG_offset)
 
-n_elec = 16
-p0 = tobi.simple_injection_protocol(n_elec=16, inj_offset=1)
-p1 = tobi.protocol()
-N_test = 10
-for _ in range(N_test):
-    for i in range(n_elec-3):
-        print(p0[i])
-        p1.add_patern(*p0[i])
 
-"""
+"""p1 = tobi.protocol()
+p1.add_patern(inj=(1, 6), rec=(2, 5))
+p1.add_patern(inj=(1, 6), rec=(2, 3))"""
 #p1.add_patern(inj=(2, 4), rec=(3, 5))
 #p1.add_patern(inj=(1, 3), rec=(2, 4))
 #p1.add_patern(inj=(1, 3), rec=(2, 4))
 
 
-p1.add_patern(inj=(3, 1), rec=(4, 2))
+"""p1.add_patern(inj=(3, 1), rec=(4, 2))
 p1.add_patern(inj=(10,4), rec=(9,5))
 #p1.add_patern(inj=(1, 7), rec=(2, 6))
-p1.add_patern(inj=(1, 7), rec=(2, 6))
+p1.add_patern(inj=(1, 7), rec=(2, 6))"""
 
-n_elec = 8
-
-p1 = tobi.simple_injection_protocol(n_elec=n_elec, inj_offset=2)
+n_elec = 16
+off_elec = 1
+p1 = tobi.simple_injection_protocol(n_elec=n_elec, inj_offset=off_elec)
 p1.change_electrode_id(0, 8)
-"""
 tb1.protocol = p1
 
 #m1 = bm.FrequentialSingleFrequency(freq=1000,nperiods=8 ,settling_time=0.001)
 f = 10000
-n_p = 15 + 4
+n_p = 30 
 m1 = bm.TemporalSingleFrequency(freq=f,nperiods=n_p,)
-v1 = np.zeros(len(p1))
-v1 = np.zeros(len(p1))
+
 
 
 
@@ -89,62 +84,33 @@ v1 = np.zeros(len(p1))
 ####### 1st measure ##########
 ##############################
 tb1.attach_measure(m1)
-
 results = tb1.eit_measure(rec_kwargs={"clear_mstack":False})
-del tb1
+results.save(save=True, fname = fname+"_01.json")
 #results = tb1.measure()
 
-#results["chan1_raw"] = bandpass(results["chan1_raw"], [f/5, 10*f], results["sample_rate"], 2)
-
-t_lim = (4/f, (n_p-3)/f)
-results.crop_time(*t_lim)
-
-# Apply a 10-50 Hz high-pass filter to the original data
-
-
-colors = ["r", "g", "b", "y", "k", "r", "g", "b", "y", "k", "r", "g", "b", "y", "k"]
-n_plot=0
+t_lim = (5/f, (n_p-5)/f)
 results.fft(*t_lim)
-for i in range(N_test):
-    for j in range(n_elec-3):
-        #print(i, j, n_plot)
-        v = results['chan1_t'][n_plot,:]
-        c = colors[j]
-        #print(v, c)
-        plt.figure(100)
-        plt.plot(results["t"],v, color=c)
-        plt.figure(2)
-        V = np.abs(results['chan1_f'][n_plot,:])/results["n_sample"]
-        print(np.shape(V), np.shape(results['chan1_f']), np.shape(results['chan1_t']))
-        print(np.shape(V), np.shape(results['f']), np.shape(results['t']))
-        I = np.where(results["f"]>100)
-        plt.plot(results["f"][I],V[I], color=c)
-        n_plot += 1
 
+v01 = results.amp_freq(f)
 
-
-plt.figure(2)
-plt.xlim((100,15000))
-
-#plt.plot(results["t_raw"],results['chan1_raw'].T, ":")
-
-
-
-v1 = results['chan1_t'].max(axis=1) - results['chan1_t'].min(axis=1)
-v12 = np.abs(results['chan1_f']/results["n_sample"]).max(axis=1)
-v13 = results.amp_freq(f)
-print(v13)
-
-for i in range(n_elec-3):
-    plt.figure(11)
-    v = v13[i::n_elec-3]
-    I = i+np.ones(len(v))
-    plt.plot(I, v, ".")
-plt.figure(100)
-plt.show()
-exit()
 tb1.clear_measures()
 tb1.clear_results()
+
+
+time.sleep(1)
+tb1.attach_measure(m1)
+results = tb1.eit_measure(rec_kwargs={"clear_mstack":False})
+results.save(save=True, fname = fname+"_02.json")
+
+
+t_lim = (5/f, (n_p-5)/f)
+results.fft(*t_lim)
+
+v02 = results.amp_freq(f)
+
+tb1.clear_measures()
+tb1.clear_results()
+
 """
 for i, p in enumerate(p1):
     if v2[i]<1e-5:
@@ -158,27 +124,11 @@ exit()
 input("press enter")
 tb1.attach_measure(m1)
 results = tb1.eit_measure(rec_kwargs={"clear_mstack":False})
-#results = tb1.measure()
+results.save(save=True, fname = fname+"_1.json")
 
+results.fft(*t_lim)
+v2 = results.amp_freq(f)
 
-t = results['t']
-ch1  = results['chan1_raw']
-
-
-
-# Load sample data from a WAV file
-sample_rate = 1/(t[1] - t[0])
-I = np.argwhere((t>2/f)&(t<(n_p-3)/f))[:,0]
-
-
-# Apply a 10-50 Hz high-pass filter to the original data
-ch1_filter = bandpass(ch1, [f/5, 10*f], sample_rate, 2)
-plt.figure()
-    #plt.plot(t,ch1-np.mean(ch1))
-plt.plot(t,ch1_filter.T, ":")
-plt.plot(t[I],ch1_filter.T[I, :])
-v1 = ch1_filter[:,I].max(axis=1) - ch1_filter[:,I].min(axis=1)
-print(v1)
 tb1.clear_measures()
 tb1.clear_results()
 
@@ -186,8 +136,50 @@ tb1.clear_results()
 ####### Reconstruction ##########
 #################################
 plt.figure()
-plt.plot(v1)
-plt.plot(v2)
+plt.plot(abs(v01 - v02))
+plt.plot(abs(v01 - v2))
 
+mesh_obj = mesh.create(n_elec, h0=0.1)
+protocol_obj = protocol.create(n_elec, dist_exc=off_elec, step_meas=1, parser_meas="std")
+
+"""
+eit = bp.BP(mesh_obj, protocol_obj)
+eit.setup(weight="none")
+# the normalize for BP when dist_exc>4 should always be True
+
+"""
+eit = jac.JAC(mesh_obj, protocol_obj)
+eit.setup(p=0.50, lamb=1e-3, method="kotre")
+
+
+ds = eit.solve(v2, v01, normalize=True)
+ds_0 = eit.solve(v02, v01, normalize=True)
+
+# extract node, element, alpha
+pts = mesh_obj.node
+tri = mesh_obj.element
+
+vmin, vmax = min(ds), max(ds)
+# draw
+fig = plt.figure(figsize=(9, 9))
+
+# reconstructed
+ax1 = plt.subplot(211)
+im = ax1.tripcolor(pts[:, 0], pts[:, 1], tri, ds, vmin=vmin, vmax=vmax)
+ax1.set_title(r"Reconstituted $\Delta$ Conductivities")
+ax1.axis("equal")
+
+fig.colorbar(im)
+
+# fig.savefig('../doc/images/demo_bp.png', dpi=96)
+#fig.colorbar(im)
+
+# reconstructed
+ax2 = plt.subplot(212)
+im2 = ax2.tripcolor(pts[:, 0], pts[:, 1], tri, ds_0, vmin=vmin, vmax=vmax)
+ax2.set_title(r"Reconstituted $\Delta$ Conductivities without change")
+ax2.axis("equal")
+#fig.colorbar(im, ax=axes.ravel().tolist())
+# fig.savefig('../doc/images/demo_bp.png', dpi=96)
+plt.tight_layout()
 plt.show()
-exit()

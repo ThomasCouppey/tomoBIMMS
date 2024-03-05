@@ -95,8 +95,7 @@ class TomoBimms(BIMMS, EIT_class):
     ########################
     def update_injection(self, inj_pat, **kwgs):
         if self.current_inj != inj_pat:
-            print()
-            print("injection set to", inj_pat)
+            print("\ninjection set to", inj_pat)
             self.current_inj = inj_pat
             self.set_STIMn_to_elec(inj_pat[0])
             self.set_STIMp_to_elec(inj_pat[1])

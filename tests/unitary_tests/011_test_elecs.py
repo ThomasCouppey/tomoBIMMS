@@ -22,7 +22,7 @@ tb1.config.DC_feedback = False
 tb1.config.V_amplitude = 100 # mV
 
 
-p1 = tobi.protocole()
+p1 = tobi.protocol()
 p1.add_patern(inj=(1, 3), rec=(2, 4))
 p1.add_patern(inj=(5, 7), rec=(6, 8))
 p1.add_patern(inj=(9, 11), rec=(10, 12))
@@ -50,7 +50,7 @@ p1.add_patern(inj=(3, 1), rec=(4, 2))
 p1.add_patern(inj=(10,4), rec=(9,5))
 #p1.add_patern(inj=(1, 7), rec=(2, 6))
 p1.add_patern(inj=(1, 7), rec=(2, 6))"""
-tb1.protocole = p1
+tb1.protocol = p1
 
 m1 = bs.FrequentialSingleFrequency(freq=1000,nperiods=8 ,settling_time=0.001)
 tb1.attach_measure(m1)

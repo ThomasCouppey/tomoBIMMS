@@ -3,30 +3,30 @@ import time
 import datetime
 from json import dump
 
-from ..protocole.Protocole import protocole
+from ..protocol.Protocol import protocol
 from ..results.EIT_results import EIT_results
 
 class EIT_class():
-    def __init__(self, N_elec=8, protocole=None) -> None:
+    def __init__(self, N_elec=8, protocol=None) -> None:
         self.N_elec = N_elec
         self.eit_results = None
 
-        self._protocole = None
+        self._protocol = None
 
     @property
-    def protocole(self):
+    def protocol(self):
         """
         
         """
-        return self._protocole
+        return self._protocol
 
-    @protocole.setter
-    def protocole(self, protocole: protocole):
-        self._protocole = protocole
+    @protocol.setter
+    def protocol(self, protocol: protocol):
+        self._protocol = protocol
 
-    @protocole.deleter
-    def protocole(self):
-        self._protocole = None
+    @protocol.deleter
+    def protocol(self):
+        self._protocol = None
 
 
     def update_injection(self, inj_pat, **kwgs):
@@ -42,16 +42,15 @@ class EIT_class():
         self.EIT_results = EIT_results()
         date = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S/")
         self.EIT_results['date'] = date
-        self.EIT_results['protocole'] = self._protocole.save()
+        self.EIT_results['protocol'] = self._protocol.save()
         self.EIT_results['status'] = "processing"
         self.EIT_results[1] = {}
         t0 = time.time()
         try:
-            for inj_pat, rec_pat in self._protocole:
+            for inj_pat, rec_pat in self._protocol:
                 self.update_injection(inj_pat, **inj_kwargs)
                 self.update_recording(rec_pat)
                 self.EIT_results[1].update(self.get_recording(**rec_kwargs))
-            print("injection done in ", time.time()-t0)
             self.EIT_results['status'] = "completed"
             #self.EIT_results['comment'] += input('optionally add a comment:\n')
         except KeyboardInterrupt:
