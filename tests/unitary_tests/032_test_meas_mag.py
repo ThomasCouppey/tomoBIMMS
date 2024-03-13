@@ -14,23 +14,9 @@ import pyeit.mesh as mesh
 # E13 -- E14 --- R4 -- E15 -- E16
 n_elec = 8
 tb1 = tobi.TomoBimms()
-"""
-tb1.config.excitation_sources("INTERNAL")
-tb1.config.excitation_mode("G_EIS")
-tb1.config.wire_mode("4_WIRE")
-tb1.config.recording_mode("V")
-tb1.config.excitation_signaling_mode("DIFF")
-tb1.config.recording_signaling_mode("DIFF")
-tb1.config.excitation_coupling("DC")
-tb1.config.G_EIS_gain = "LOW"
-tb1.config.IRO_gain = 5
-tb1.config.VRO_gain = 5
-tb1.config.DC_feedback = False
-tb1.config.I_amplitude = 100 # uA
-tb1.config.V_amplitude = 100 # mV
-"""
-tb1.config_mode("MANUAL")
+tb1.keep_on()
 
+tb1.config_mode("MANUAL")
 tb1.manual_config.waveform_gen("INTERNAL")
 tb1.manual_config.excitation_source("CURRENT")
 tb1.manual_config.I_source_gain("HIGH")
@@ -47,11 +33,19 @@ tb1.manual_config.TIA_coupling("DC")
 tb1.manual_config.connect_TIA(False)
 tb1.manual_config.TIA_to_CH2(False)
 tb1.manual_config.TIA_NEG("GND")
-tb1.manual_config.CH1_gain(10)
-tb1.manual_config.CH2_gain(10)
+tb1.manual_config.CH1_gain(20)
+tb1.manual_config.CH2_gain(1)
 
-amp_AWG = 0.5
+amp_AWG = 1
+#AWG_offset=.07
+
 tb1.manual_config.AWG_amp(amp_AWG)
+n_avg = 3
+n_elec = 16
+off_elec = 3
+p1 = tobi.simple_pyeit_protocol(n_elec=n_elec, inj_offset=off_elec)
+tb1.protocol = p1
+
 
 """
 p1 = tobi.simple_injection_protocol(n_elec=n_elec)
@@ -66,35 +60,21 @@ for i in range(10):
 tb1.protocol = p1
 
 m1 = bm.FrequentialSingleFrequency(freq=1000,nperiods=32 ,settling_time=0.001)
-#m1 = bm.TemporalSingleFrequency(freq = 1000,nperiods=10)
 tb1.attach_measure(m1)
 
 tb1.set_CH2p_to_elec(16)
 tb1.set_CH2n_to_elec(15)
 
-"""tb1.eit_measure()
-tb1.clear_results()
-input("Change the impedance and press a key")"""
+
 results1 = tb1.eit_measure()
 results1.save(save=True, fname="013_Omega_0.json")
-
+results1.EIS()
 tb1.clear_results()
 input("Change the impedance and press a key")
 results2 = tb1.eit_measure()
 results2.save(save=True, fname="013_Omega_1.json")
-"""
-t = results1['t']
-ch1  = results1['chan1_raw']
-ch2 = results2['chan1_raw']
-
-plt.figure()
-plt.plot(t,ch1)
-plt.plot(t,ch2)
-plt.show()
-exit()"""
-
-results1.EIS()
 results2.EIS()
+
 err = results1.mag_Z - results2.mag_Z
 print(np.shape(results1.mag_Z))
 print(np.shape(results2.mag_Z))

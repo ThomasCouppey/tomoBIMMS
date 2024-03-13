@@ -89,6 +89,26 @@ class TomoBimms(BIMMS, EIT_class):
     # BIMMS Config overloads #
     ##########################
 
+    def __init_default_config(self):
+        self.config_mode("MANUAL")
+        self.manual_config.waveform_gen("INTERNAL")
+        self.manual_config.excitation_source("CURRENT")
+        self.manual_config.I_source_gain("HIGH")
+        self.manual_config.wire_mode("4_WIRE")
+        self.manual_config.excitation_signaling_mode("DIFF")
+        self.manual_config.excitation_coupling("DC")
+        self.manual_config.DC_feedback(False)
+        self.manual_config.Enable_Isource(True)
+
+        self.manual_config.CHx_to_Scopex("CH1")
+        self.manual_config.CH1_coupling("DC")
+        self.manual_config.CH2_coupling("DC")
+        self.manual_config.TIA_coupling("DC")
+        self.manual_config.connect_TIA(False)
+        self.manual_config.TIA_to_CH2(False)
+        self.manual_config.TIA_NEG("GND")
+        self.manual_config.CH1_gain(1)
+        self.manual_config.CH2_gain(1)
 
     ########################
     # EIT relative methods #

@@ -86,9 +86,9 @@ meas = {}
 meas['date'] = date
 for freq in freqs:
     meas[freq] = []
-meas['protocole'] = {}
-meas['protocole']['inj'] = []
-meas['protocole']['rec'] = []
+meas['protocol'] = {}
+meas['protocol']['inj'] = []
+meas['protocol']['rec'] = []
 meas['status'] = "processing"
 meas['comment'] = input('eventually add a comment:\n')
 try:
@@ -108,8 +108,8 @@ try:
             input('- Press a Key when ready')
             if rec_pat[1] == i_inj:
                 rec_pat[1] = (rec_pat[1]+2) %Nelec
-            meas['protocole']['inj'] += [inj_pat]
-            meas['protocole']['rec'] += [rec_pat]
+            meas['protocol']['inj'] += [inj_pat]
+            meas['protocol']['rec'] += [rec_pat]
 
             for freq in freqs:
                 print("f =", freq)

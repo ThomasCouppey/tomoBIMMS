@@ -25,30 +25,30 @@ def bandpass(data: np.ndarray, edges: list[float], sample_rate: float, poles: in
 tb1 = tobi.TomoBimms()
 tb1.keep_on()
 
-tb1.config_mode("TEST")
-tb1.test_config.waveform_gen("INTERNAL")
-tb1.test_config.excitation_source("CURRENT")
-tb1.test_config.I_source_gain("HIGH")
-tb1.test_config.wire_mode("4_WIRE")
-tb1.test_config.excitation_signaling_mode("DIFF")
-tb1.test_config.excitation_coupling("DC")
-tb1.test_config.DC_feedback(False)
-tb1.test_config.Enable_Isource(True)
+tb1.config_mode("MANUAL")
+tb1.manual_config.waveform_gen("INTERNAL")
+tb1.manual_config.excitation_source("CURRENT")
+tb1.manual_config.I_source_gain("HIGH")
+tb1.manual_config.wire_mode("4_WIRE")
+tb1.manual_config.excitation_signaling_mode("DIFF")
+tb1.manual_config.excitation_coupling("DC")
+tb1.manual_config.DC_feedback(False)
+tb1.manual_config.Enable_Isource(True)
 
-tb1.test_config.CHx_to_Scopex("CH1")
-tb1.test_config.CH1_coupling("DC")
-tb1.test_config.CH2_coupling("DC")
-tb1.test_config.TIA_coupling("DC")
-tb1.test_config.connect_TIA(False)
-tb1.test_config.TIA_to_CH2(False)
-tb1.test_config.TIA_NEG("GND")
-tb1.test_config.CH1_gain(20)
-tb1.test_config.CH2_gain(1)
+tb1.manual_config.CHx_to_Scopex("CH1")
+tb1.manual_config.CH1_coupling("DC")
+tb1.manual_config.CH2_coupling("DC")
+tb1.manual_config.TIA_coupling("DC")
+tb1.manual_config.connect_TIA(False)
+tb1.manual_config.TIA_to_CH2(False)
+tb1.manual_config.TIA_NEG("GND")
+tb1.manual_config.CH1_gain(20)
+tb1.manual_config.CH2_gain(1)
 
 amp_AWG = 1
 #AWG_offset=.07
 
-tb1.test_config.AWG_amp(amp_AWG)
+tb1.manual_config.AWG_amp(amp_AWG)
 n_avg = 3
 n_elec = 16
 off_elec = 3
@@ -62,7 +62,8 @@ m1 = bm.TemporalSingleFrequency(freq=f,nperiods=n_p,)
 
 mesh_obj = mesh.create(n_elec, h0=0.04)
 protocol_obj = protocol.create(n_elec, dist_exc=off_elec, step_meas=1, parser_meas="std")
-
+eit = jac.JAC(mesh_obj, protocol_obj)
+eit.setup(p=0.50, lamb=1e-3, method="kotre")
 
 
 ##############################
@@ -95,8 +96,6 @@ t_lim = (5/f, (n_p-5)/f)
 results.fft(*t_lim)
 
 v02 = results.amp_freq(f)
-eit = jac.JAC(mesh_obj, protocol_obj)
-eit.setup(p=0.50, lamb=1e-3, method="kotre")
 ds_0 = eit.solve(v02, v01, normalize=True)
 
 

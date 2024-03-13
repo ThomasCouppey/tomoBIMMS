@@ -2,26 +2,17 @@ import tobi
 import bimms as bm
 import matplotlib.pyplot as plt
 import numpy as np
-import scipy.signal
+import time
+
 import pyeit.eit.bp as bp
 import pyeit.eit.jac as jac
 import pyeit.eit.protocol as protocol
 import pyeit.mesh as mesh
-import time
-
-fname = "unitary_tests/results/024_results"
-
-def bandpass(data: np.ndarray, edges: list[float], sample_rate: float, poles: int = 5):
-    sos = scipy.signal.butter(poles, edges, 'bandpass', fs=sample_rate, output='sos')
-    filtered_data = scipy.signal.sosfiltfilt(sos, data)
-    return filtered_data
-
 ## Requiered: Two known resistors R1, R2
 # E1 -- E2 --- R1 -- E3 -- E4
 # E5 -- E6 --- R2 -- E7 -- E8
 # E9 -- E10 --- R3 -- E11 -- E12
 # E13 -- E14 --- R4 -- E15 -- E16
-
 tb1 = tobi.TomoBimms()
 tb1.keep_on()
 
@@ -55,29 +46,21 @@ off_elec = 3
 p1 = tobi.simple_pyeit_protocol(n_elec=n_elec, inj_offset=off_elec)
 tb1.protocol = p1
 
-f = 10000
-n_p = 20
-m1 = bm.TemporalSingleFrequency(freq=f,nperiods=n_p,)
-
+m1 = bm.FrequentialSingleFrequency(freq=10000,nperiods=32 ,settling_time=0.001)
 
 mesh_obj = mesh.create(n_elec, h0=0.04)
 protocol_obj = protocol.create(n_elec, dist_exc=off_elec, step_meas=1, parser_meas="std")
-
+eit = jac.JAC(mesh_obj, protocol_obj)
+eit.setup(p=0.50, lamb=1e-3, method="kotre")
 
 
 ##############################
 ####### 1st measure ##########
 ##############################
-
-t_lim = (5/f, (n_p-5)/f)
-
 tb1.attach_measure(m1)
-results = tb1.eit_measure(rec_kwargs={"clear_mstack":False})
-
-results.fft(*t_lim)
-v01 = results.amp_freq(f)
-tb1.clear_measures()
-tb1.clear_results()
+results = tb1.eit_measure()
+results.EIS()
+v01 = results.mag_Z
 
 
 tb1.clear_measures()
@@ -86,19 +69,12 @@ tb1.clear_results()
 
 time.sleep(1)
 tb1.attach_measure(m1)
-results = tb1.eit_measure(rec_kwargs={"clear_mstack":False})
-results.save(save=True, fname = fname+"_02.json")
+results = tb1.eit_measure()
+results.EIS()
+v02 = results.mag_Z
+ds_0 = eit.solve(v02, v01, normalize=True)
 tb1.clear_measures()
 tb1.clear_results()
-
-t_lim = (5/f, (n_p-5)/f)
-results.fft(*t_lim)
-
-v02 = results.amp_freq(f)
-eit = bp.BP(mesh_obj, protocol_obj)
-eit.setup(weight="none")
-ds_0 = eit.solve(v02, v01, normalize=True)
-
 
 """
 for i, p in enumerate(p1):
@@ -113,10 +89,9 @@ print("measure dz -> E1")
 input("press enter")
 
 tb1.attach_measure(m1)
-results = tb1.eit_measure(rec_kwargs={"clear_mstack":False})
-
-results.fft(*t_lim)
-vd1 = results.amp_freq(f)
+results = tb1.eit_measure()
+results.EIS()
+vd1 = results.mag_Z
 tb1.clear_measures()
 tb1.clear_results()
 
@@ -130,10 +105,9 @@ print("measure dz -> E5")
 input("press enter")
 
 tb1.attach_measure(m1)
-results = tb1.eit_measure(rec_kwargs={"clear_mstack":False})
-
-results.fft(*t_lim)
-vd5 = results.amp_freq(f)
+results = tb1.eit_measure()
+results.EIS()
+vd5 = results.mag_Z
 tb1.clear_measures()
 tb1.clear_results()
 
@@ -147,10 +121,9 @@ print("measure dz -> E9")
 input("press enter")
 
 tb1.attach_measure(m1)
-results = tb1.eit_measure(rec_kwargs={"clear_mstack":False})
-
-results.fft(*t_lim)
-vd9 = results.amp_freq(f)
+results = tb1.eit_measure()
+results.EIS()
+vd9 = results.mag_Z
 tb1.clear_measures()
 tb1.clear_results()
 
@@ -164,18 +137,14 @@ print("measure dz -> E13")
 input("press enter")
 
 tb1.attach_measure(m1)
-results = tb1.eit_measure(rec_kwargs={"clear_mstack":False})
-
-results.fft(*t_lim)
-vd13 = results.amp_freq(f)
+results = tb1.eit_measure()
+results.EIS()
+vd13 = results.mag_Z
 tb1.clear_measures()
 tb1.clear_results()
 
-
 ds_13 = eit.solve(vd13, v01, normalize=True)
-#################################
-####### Reconstruction ##########
-#################################
+
 plt.figure()
 plt.plot(v02)
 plt.plot(vd1)
@@ -189,7 +158,6 @@ plt.plot(abs(v01 - vd1))
 plt.plot(abs(v01 - vd5))
 plt.plot(abs(v01 - vd9))
 plt.plot(abs(v01 - vd13))
-
 
 
 
@@ -210,7 +178,7 @@ fig = plt.figure(figsize=(9, 9))
 # reconstructed
 ax1 = plt.subplot(221)
 im = ax1.tripcolor(pts[:, 0], pts[:, 1], tri, ds_5, vmin=vmin, vmax=vmax)
-ax1.set_title(r"Reconstituted $\Delta Z$ to E-E")
+ax1.set_title(r"Reconstituted $\Delta Z$ to N-E")
 ax1.axis("equal")
 
 #fig.colorbar(im)
