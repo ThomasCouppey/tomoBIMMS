@@ -22,7 +22,7 @@ def bandpass(data: np.ndarray, edges: list[float], sample_rate: float, poles: in
 # E9 -- E10 --- R3 -- E11 -- E12
 # E13 -- E14 --- R4 -- E15 -- E16
 
-tb1 = tobi.TomoBimms()
+tb1 = tobi.TomoBimms(1)
 tb1.keep_on()
 
 tb1.config_mode("TEST")
@@ -42,13 +42,16 @@ tb1.test_config.TIA_coupling("DC")
 tb1.test_config.connect_TIA(False)
 tb1.test_config.TIA_to_CH2(False)
 tb1.test_config.TIA_NEG("GND")
-tb1.test_config.CH1_gain(20)
+tb1.test_config.CH1_gain(100)
 tb1.test_config.CH2_gain(1)
 
 amp_AWG = 1
-#AWG_offset=.07
+AWG_offset=.09
 
 tb1.test_config.AWG_amp(amp_AWG)
+tb1.test_config.AWG_offset(AWG_offset)
+
+
 n_avg = 3
 n_elec = 16
 off_elec = 3
@@ -60,7 +63,7 @@ n_p = 30
 m1 = bm.TemporalSingleFrequency(freq=f,nperiods=n_p,)
 
 
-mesh_obj = mesh.create(n_elec, h0=0.04)
+mesh_obj = mesh.create(n_elec, h0=0.08)
 protocol_obj = protocol.create(n_elec, dist_exc=off_elec, step_meas=1, parser_meas="std")
 
 

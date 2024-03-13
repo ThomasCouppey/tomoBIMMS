@@ -39,7 +39,7 @@ tb1.test_config.TIA_coupling("DC")
 tb1.test_config.connect_TIA(False)
 tb1.test_config.TIA_to_CH2(False)
 tb1.test_config.TIA_NEG("GND")
-tb1.test_config.CH1_gain(20)
+tb1.test_config.CH1_gain(1)
 tb1.test_config.CH2_gain(1)
 
 amp_AWG = 1
@@ -49,7 +49,7 @@ tb1.test_config.AWG_amp(amp_AWG)
 #tb1.test_config.AWG_offset(AWG_offset)
 
 n_elec = 16
-p0 = tobi.simple_injection_protocol(n_elec=16, inj_offset=1)
+p0 = tobi.simple_injection_protocol(n_elec=16, start_elec=1)
 p1 = tobi.protocol()
 N_test = 50
 for _ in range(N_test):

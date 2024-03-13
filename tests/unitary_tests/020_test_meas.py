@@ -19,7 +19,7 @@ def bandpass(data: np.ndarray, edges: list[float], sample_rate: float, poles: in
 # E9 -- E10 --- R3 -- E11 -- E12
 # E13 -- E14 --- R4 -- E15 -- E16
 
-tb1 = tobi.TomoBimms()
+tb1 = tobi.TomoBimms(1)
 tb1.keep_on()
 
 tb1.config_mode("TEST")
@@ -27,7 +27,7 @@ tb1.test_config.waveform_gen("INTERNAL")
 tb1.test_config.excitation_source("CURRENT")
 tb1.test_config.I_source_gain("HIGH")
 tb1.test_config.wire_mode("4_WIRE")
-tb1.test_config.excitation_signaling_mode("SE")
+tb1.test_config.excitation_signaling_mode("DIFF")
 tb1.test_config.excitation_coupling("DC")
 tb1.test_config.DC_feedback(False)
 tb1.test_config.Enable_Isource(True)
@@ -39,33 +39,35 @@ tb1.test_config.TIA_coupling("DC")
 tb1.test_config.connect_TIA(False)
 tb1.test_config.TIA_to_CH2(False)
 tb1.test_config.TIA_NEG("GND")
-tb1.test_config.CH1_gain(50)
+tb1.test_config.CH1_gain(100)
 tb1.test_config.CH2_gain(1)
 
 amp_AWG = 1
-#AWG_offset=.07
+AWG_offset=.095
 
 tb1.test_config.AWG_amp(amp_AWG)
 #tb1.test_config.AWG_offset(AWG_offset)
 
 n_elec = 16
-p0 = tobi.simple_injection_protocol(n_elec=16, inj_offset=1)
+p0 = tobi.simple_injection_protocol(n_elec=16, start_elec=7)
 p1 = tobi.protocol()
 N_test = 10
+
 for _ in range(N_test):
     for i in range(n_elec-3):
         print(p0[i])
         p1.add_patern(*p0[i])
 
 """
-#p1.add_patern(inj=(2, 4), rec=(3, 5))
-#p1.add_patern(inj=(1, 3), rec=(2, 4))
-#p1.add_patern(inj=(1, 3), rec=(2, 4))
+for _ in range(N_test):
+        p1.add_patern(inj=(1, 2), rec=(1, 2))
+        p1.add_patern(inj=(2, 3), rec=(2, 3))
+        p1.add_patern(inj=(1, 2), rec=(2, 3))
 
 
 p1.add_patern(inj=(3, 1), rec=(4, 2))
 p1.add_patern(inj=(10,4), rec=(9,5))
-#p1.add_patern(inj=(1, 7), rec=(2, 6))
+#p1.add_patern(inj=(1, 7), rec=(2, 6)
 p1.add_patern(inj=(1, 7), rec=(2, 6))
 
 n_elec = 8
