@@ -22,6 +22,7 @@ def bandpass(data: np.ndarray, edges: list[float], sample_rate: float, poles: in
 tb1 = tobi.TomoBimms()
 tb1.keep_on()
 
+
 tb1.config_mode("MANUAL")
 tb1.manual_config.waveform_gen("INTERNAL")
 tb1.manual_config.excitation_source("CURRENT")
@@ -49,7 +50,7 @@ tb1.manual_config.AWG_amp(amp_AWG)
 #tb1.manual_config.AWG_offset(AWG_offset)
 
 n_elec = 16
-p0 = tobi.simple_injection_protocol(n_elec=16, inj_offset=1)
+p0 = tobi.simple_injection_protocol(n_elec=16, start_elec=1)
 p1 = tobi.protocol()
 N_test = 50
 for _ in range(N_test):
