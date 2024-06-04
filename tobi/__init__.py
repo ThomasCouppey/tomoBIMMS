@@ -2,7 +2,7 @@
 
 # Meta information
 __title__           = 'tomiBIMMS'
-__version__         = '0.0.1'
+__version__         = '0.0.2'
 __date__            = '2023–10–24'
 __author__          = 'Thomas Couppey'
 __contributors__    = 'Thomas Couppey, Louis Regnacq, Florian Kolbl'

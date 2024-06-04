@@ -15,7 +15,7 @@ pkg_data={}
 
 setup(
    name='tomoBIMMS',
-   version='0.0.1',
+   version='0.0.2',
    description='BIMMS multiplexing python API',
    long_description = 'file: README.md',
    author='Thomas Couppey - Louis Regnacq - Florian Kolbl',
