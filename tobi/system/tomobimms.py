@@ -27,6 +27,9 @@ class TomoBimms(BIMMS, EIT_class):
         self.sw_vector=cstmux.sw_default 
         self.set_switches(0)    #Dummy set (Bug?)
 
+        self.__init_default_config()
+
+        # Tomo init
         self.current_inj = None
         self.current_rec = None
 
@@ -88,7 +91,6 @@ class TomoBimms(BIMMS, EIT_class):
     ##########################
     # BIMMS Config overloads #
     ##########################
-
     def __init_default_config(self):
         self.config_mode("MANUAL")
         self.manual_config.waveform_gen("INTERNAL")
@@ -110,6 +112,7 @@ class TomoBimms(BIMMS, EIT_class):
         self.manual_config.CH1_gain(1)
         self.manual_config.CH2_gain(1)
 
+
     ########################
     # EIT relative methods #
     ########################
@@ -129,7 +132,6 @@ class TomoBimms(BIMMS, EIT_class):
             #time.sleep(0.001)
 
     def get_recording(self, clear_mstack=False, overwrite=False, **kwgs):
-
         super().measure(clear_mstack=clear_mstack, overwrite=overwrite)
         return {}
 
