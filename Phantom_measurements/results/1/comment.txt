@@ -1,0 +1,10 @@
+PARAMETERS:
+n_elec=15
+off_elec=4
+freq=1000.0 Hz
+amp_AWG=0.1
+g_ch11
+
+COMMENT
+
+millieu -> haut -> droite -> droite

@@ -1,0 +1,6 @@
+PARAMETERS:
+n_elec=15
+off_elec=2
+freq=1000.0 Hz
+
+COMMENT
