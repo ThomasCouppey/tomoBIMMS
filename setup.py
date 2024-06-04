@@ -3,8 +3,10 @@ from setuptools import setup
 # architecture
 pkg=[
     "tobi",
-    "tobi.results",
+    "tobi.backend",
+    "tobi.utils",
     "tobi.protocol",
+    "tobi.results",
     "tobi.system",
     "tobi.utils",
 ]
@@ -12,9 +14,9 @@ pkg=[
 pkg_data={}
 
 setup(
-   name='tomiBIMMS',
+   name='tomoBIMMS',
    version='0.0.1',
-   description='BIMMS python API',
+   description='BIMMS multiplexing python API',
    long_description = 'file: README.md',
    author='Thomas Couppey - Louis Regnacq - Florian Kolbl',
    packages=pkg,
